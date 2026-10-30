@@ -4,11 +4,14 @@ The shared platform for bnt.hm apps: how an app
 runs on Cloudflare Workers behind Cloudflare Access. Domain logic and each
 app's look stay in the apps.
 
-Install a tagged version, never a branch:
+Install an exact commit (or a tag), never a branch, so an app only changes kit
+when its own commit says so:
 
 ```json
-"bnt-kit": "github:Benthem/bnt-kit#v0.1.0"
+"bnt-kit": "github:Benthem/bnt-kit#<commit sha>"
 ```
+
+CHANGELOG.md lists the commit of each version.
 
 The kit ships compiled JavaScript (`dist/`, committed, built by
 `npm run build`) with its TypeScript source as the types, so it runs in Workers,
@@ -31,8 +34,9 @@ their Vite config so the kit's hooks use the app's Preact.
 ## Changing the kit
 
 1. Change, add a test, `npm run build`, `npm run check` (fails when `dist/` is stale).
-2. Add a CHANGELOG entry, bump `version`, tag `vX.Y.Z`, push the tag.
-3. In each app, bump the tag in `package.json`, `npm install`, `npm run check`.
+2. Add a CHANGELOG entry and bump `version`; push to `main`. Note the commit
+   in the CHANGELOG (and tag it `vX.Y.Z` where tags can be pushed).
+3. In each app, point `package.json` at the new commit, `npm install`, `npm run check`.
 
 Breaking changes bump the minor version while below 1.0. Apps move one at a
 time; an app can stay on an older tag.
