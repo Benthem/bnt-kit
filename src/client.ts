@@ -19,10 +19,14 @@ export class Offline extends Error {
 /** Fired on window whenever a request finds the login expired. */
 export const SIGN_IN_EVENT = "bnt:sign-in";
 
-const signInNeeded = () => {
+/**
+ * Reports an expired login (shows the app's "Sign in again") and returns the
+ * error to throw. For code that reads responses itself.
+ */
+export function signInNeeded(): SignInNeeded {
   dispatchEvent(new Event(SIGN_IN_EVENT));
   return new SignInNeeded();
-};
+}
 
 /**
  * fetch that turns Access's expired-login answers into SignInNeeded and a
