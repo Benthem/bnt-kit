@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0
+## 0.1.0 — commit e56102ecf03fbd9ce6bd8300c194c0c6c36437c6
 
 First version, taken from Trippie and Centen: Access JWT check, D1 migrations
 (apply, status, apply-on-first-use), board client with "Sign in again",
