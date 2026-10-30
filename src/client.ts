@@ -11,6 +11,15 @@ export class SignInNeeded extends Error {
   constructor() { super("Your login has expired."); this.name = "SignInNeeded"; }
 }
 
+/**
+ * Thrown when Cloudflare answers with its own error page (status 500 and up),
+ * e.g. when the Worker ran out of CPU time: not a login problem.
+ */
+export class ServerError extends Error {
+  readonly status: number;
+  constructor(status: number) { super("The server couldn't finish this. Try again in a moment."); this.name = "ServerError"; this.status = status; }
+}
+
 /** Thrown when the network is down. */
 export class Offline extends Error {
   constructor() { super("No connection. Try again when you are online."); this.name = "Offline"; }
@@ -42,7 +51,11 @@ export async function accessFetch(input: RequestInfo | URL, init: RequestInit = 
     throw navigator.onLine ? signInNeeded() : new Offline();
   }
   const type = res.headers.get("content-type") ?? "";
-  if (!type.includes("application/json") && (res.redirected || type.includes("text/html"))) throw signInNeeded();
+  if (!type.includes("application/json") && (res.redirected || type.includes("text/html"))) {
+    // Cloudflare's own error pages are HTML too; only Access's login is a sign-in.
+    if (res.status >= 500 && !res.redirected) throw new ServerError(res.status);
+    throw signInNeeded();
+  }
   return res;
 }
 
@@ -50,6 +63,7 @@ export async function accessFetch(input: RequestInfo | URL, init: RequestInit = 
 export async function readJson<T = unknown>(res: Response): Promise<T> {
   const type = res.headers.get("content-type") ?? "";
   if (!type.includes("application/json")) {
+    if (res.status >= 500 && !res.redirected) throw new ServerError(res.status);
     if (res.redirected || type.includes("text/html")) throw signInNeeded();
     throw new Error(`Unexpected answer (${res.status}).`);
   }
