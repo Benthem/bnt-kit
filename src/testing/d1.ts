@@ -4,7 +4,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { getPlatformProxy } from "wrangler";
-import { statements } from "../d1-migrations";
+import { statements } from "../d1-migrations.js";
 
 export interface OpenD1Options {
   /** A wrangler config with a D1 binding named DB, e.g. test/d1.wrangler.jsonc. */

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2022", "lib": ["es2023", "dom", "dom.iterable"], "module": "es2022", "moduleResolution": "bundler",
     "jsx": "react-jsx", "jsxImportSource": "preact", "types": [],
-    "strict": true, "noUncheckedIndexedAccess": true, "noEmit": true, "skipLibCheck": true,
+    "strict": true, "erasableSyntaxOnly": true, "noUncheckedIndexedAccess": true, "noEmit": true, "skipLibCheck": true,
     "isolatedModules": true, "verbatimModuleSyntax": true
   },
   "include": ["src/client.ts", "src/pwa.ts"]

@@ -90,7 +90,8 @@ export async function migrationStatus(db: D1Database, bundle: Bundle, options: M
 }
 
 export class MigrationError extends Error {
-  constructor(readonly migration: string, message: string, options?: { cause?: unknown }) { super(message, options); }
+  readonly migration: string;
+  constructor(migration: string, message: string, options?: { cause?: unknown }) { super(message, options); this.migration = migration; }
 }
 
 /**

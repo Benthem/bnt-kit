@@ -4,25 +4,56 @@
   "description": "Shared platform for bnt.hm apps on Cloudflare behind Access",
   "type": "module",
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/Benthem/bnt-kit.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Benthem/bnt-kit.git"
+  },
   "exports": {
-    "./auth": "./src/auth.ts",
-    "./d1-migrations": "./src/d1-migrations.ts",
-    "./client": "./src/client.ts",
-    "./pwa": "./src/pwa.ts",
-    "./sw": "./src/sw.ts",
-    "./testing/d1": "./src/testing/d1.ts",
-    "./testing/purity": "./src/testing/purity.ts"
+    "./auth": {
+      "types": "./src/auth.ts",
+      "default": "./dist/auth.js"
+    },
+    "./d1-migrations": {
+      "types": "./src/d1-migrations.ts",
+      "default": "./dist/d1-migrations.js"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./dist/client.js"
+    },
+    "./pwa": {
+      "types": "./src/pwa.ts",
+      "default": "./dist/pwa.js"
+    },
+    "./sw": {
+      "types": "./src/sw.ts",
+      "default": "./dist/sw.js"
+    },
+    "./testing/d1": {
+      "types": "./src/testing/d1.ts",
+      "default": "./dist/testing/d1.js"
+    },
+    "./testing/purity": {
+      "types": "./src/testing/purity.ts",
+      "default": "./dist/testing/purity.js"
+    }
   },
   "bin": {
     "bnt-bundle-migrations": "./bin/bundle-migrations.mjs",
     "bnt-worker-build": "./bin/worker-build.mjs"
   },
-  "files": ["src", "bin", "README.md", "CHANGELOG.md"],
+  "files": [
+    "src",
+    "dist",
+    "bin",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
+    "build": "node scripts/build.mjs",
     "typecheck": "tsc -p . && tsc -p tsconfig.board.json && tsc -p tsconfig.sw.json",
     "test": "vitest run",
-    "check": "npm run typecheck && npm test"
+    "check": "node scripts/build.mjs --check && npm run typecheck && npm test"
   },
   "dependencies": {
     "jose": "^6.2.12"
@@ -33,9 +64,15 @@
     "wrangler": "^4.147.0"
   },
   "peerDependenciesMeta": {
-    "@babel/core": { "optional": true },
-    "preact": { "optional": true },
-    "wrangler": { "optional": true }
+    "@babel/core": {
+      "optional": true
+    },
+    "preact": {
+      "optional": true
+    },
+    "wrangler": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -44,6 +81,7 @@
     "preact": "^10.29.8",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3",
-    "wrangler": "^4.147.0"
+    "wrangler": "^4.147.0",
+    "esbuild": "^0.28.2"
   }
 }

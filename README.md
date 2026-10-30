@@ -10,9 +10,11 @@ Install a tagged version, never a branch:
 "bnt-kit": "github:Benthem/bnt-kit#v0.1.0"
 ```
 
-The kit ships TypeScript source; apps compile it with their own tsconfig.
-Vitest needs `test.server.deps.inline: ["bnt-kit"]` to transform it, and Vite
-needs `resolve: { dedupe: ["preact"] }` so the kit's hooks use the app's Preact.
+The kit ships compiled JavaScript (`dist/`, committed, built by
+`npm run build`) with its TypeScript source as the types, so it runs in Workers,
+Vite, Vitest and plain Node alike. Source uses only erasable TypeScript. Apps
+using `bnt-kit/pwa` or `bnt-kit/client` need `resolve: { dedupe: ["preact"] }` in
+their Vite config so the kit's hooks use the app's Preact.
 
 | Import | What |
 |---|---|
@@ -28,7 +30,7 @@ needs `resolve: { dedupe: ["preact"] }` so the kit's hooks use the app's Preact.
 
 ## Changing the kit
 
-1. Change, add a test, `npm run check`.
+1. Change, add a test, `npm run build`, `npm run check` (fails when `dist/` is stale).
 2. Add a CHANGELOG entry, bump `version`, tag `vX.Y.Z`, push the tag.
 3. In each app, bump the tag in `package.json`, `npm install`, `npm run check`.
 
