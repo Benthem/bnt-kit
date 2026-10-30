@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { accessFetch, Offline, readJson, SIGN_IN_EVENT, SignInNeeded } from "../src/client";
+import { accessFetch, Offline, readJson, ServerError, SIGN_IN_EVENT, SignInNeeded } from "../src/client";
 
 let events: string[] = [];
 beforeEach(() => {
@@ -9,8 +9,8 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
-const respond = (body: string, type: string, redirected = false) => {
-  const res = new Response(body, { headers: { "content-type": type } });
+const respond = (body: string, type: string, redirected = false, status = 200) => {
+  const res = new Response(body, { status, headers: { "content-type": type } });
   Object.defineProperty(res, "redirected", { value: redirected });
   return res;
 };
@@ -26,6 +26,12 @@ describe("accessFetch", () => {
     vi.stubGlobal("fetch", async () => respond("<html>login</html>", "text/html", true));
     await expect(accessFetch("/api/x")).rejects.toBeInstanceOf(SignInNeeded);
     expect(events).toEqual([SIGN_IN_EVENT]);
+  });
+
+  it("tells Cloudflare's error pages (Worker out of CPU) apart from the login", async () => {
+    vi.stubGlobal("fetch", async () => respond("<html>Error 1102</html>", "text/html", false, 503));
+    await expect(accessFetch("/api/x")).rejects.toBeInstanceOf(ServerError);
+    expect(events).toEqual([]);
   });
 
   it("treats a refused cross-origin redirect as an expired login when online", async () => {

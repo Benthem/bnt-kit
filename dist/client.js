@@ -6,6 +6,14 @@ class SignInNeeded extends Error {
     this.name = "SignInNeeded";
   }
 }
+class ServerError extends Error {
+  status;
+  constructor(status) {
+    super("The server couldn't finish this. Try again in a moment.");
+    this.name = "ServerError";
+    this.status = status;
+  }
+}
 class Offline extends Error {
   constructor() {
     super("No connection. Try again when you are online.");
@@ -26,12 +34,16 @@ async function accessFetch(input, init = {}) {
     throw navigator.onLine ? signInNeeded() : new Offline();
   }
   const type = res.headers.get("content-type") ?? "";
-  if (!type.includes("application/json") && (res.redirected || type.includes("text/html"))) throw signInNeeded();
+  if (!type.includes("application/json") && (res.redirected || type.includes("text/html"))) {
+    if (res.status >= 500 && !res.redirected) throw new ServerError(res.status);
+    throw signInNeeded();
+  }
   return res;
 }
 async function readJson(res) {
   const type = res.headers.get("content-type") ?? "";
   if (!type.includes("application/json")) {
+    if (res.status >= 500 && !res.redirected) throw new ServerError(res.status);
     if (res.redirected || type.includes("text/html")) throw signInNeeded();
     throw new Error(`Unexpected answer (${res.status}).`);
   }
@@ -57,6 +69,7 @@ export {
   Offline,
   SIGN_IN_EVENT,
   SIGN_IN_PARAM,
+  ServerError,
   SignInNeeded,
   accessFetch,
   forgetSignInMarker,
