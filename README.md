@@ -11,7 +11,8 @@ Install a tagged version, never a branch:
 ```
 
 The kit ships TypeScript source; apps compile it with their own tsconfig.
-Vitest needs `test.server.deps.inline: ["bnt-kit"]` to transform it.
+Vitest needs `test.server.deps.inline: ["bnt-kit"]` to transform it, and Vite
+needs `resolve: { dedupe: ["preact"] }` so the kit's hooks use the app's Preact.
 
 | Import | What |
 |---|---|
