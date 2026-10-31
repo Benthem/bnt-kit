@@ -4,9 +4,10 @@
 
 No changes for apps. The Access login check has its own tests in the kit
 (audience, issuer, expiry, forged and unsigned tokens, missing email, the dev
-bypass only on localhost). CI tags versions after a green check on main.
+bypass only on localhost). CI tags each new version after a green check on
+main (from this version on).
 
-## 0.1.0 — commit e56102ecf03fbd9ce6bd8300c194c0c6c36437c6
+## 0.1.0 (untagged: commit e56102ecf03fbd9ce6bd8300c194c0c6c36437c6)
 
 First version, taken from Trippie and Centen: Access JWT check, D1 migrations
 (apply, status, apply-on-first-use), board client with "Sign in again",
