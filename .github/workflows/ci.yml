@@ -2,7 +2,6 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   pull_request:
 jobs:
   check:
@@ -16,3 +15,32 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+
+  # Versions are tagged here, not by hand: after a green check on main, the
+  # version in package.json gets its tag on this commit, and every version the
+  # CHANGELOG lists with "— commit <sha>" gets its tag on that commit.
+  tag:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag versions
+        run: |
+          set -euo pipefail
+          tag() {
+            if git rev-parse -q --verify "refs/tags/$1" >/dev/null; then
+              echo "$1 already tagged"
+            else
+              git tag "$1" "$2" && echo "tagged $1 at $2"
+            fi
+          }
+          grep -E '^## [0-9]+\.[0-9]+\.[0-9]+ — commit [0-9a-f]{40}$' CHANGELOG.md | while read -r _ version _ _ sha; do
+            tag "v$version" "$sha"
+          done
+          tag "v$(node -p "require('./package.json').version")" "$GITHUB_SHA"
+          git push origin --tags

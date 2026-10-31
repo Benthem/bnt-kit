@@ -34,8 +34,8 @@ their Vite config so the kit's hooks use the app's Preact.
 ## Changing the kit
 
 1. Change, add a test, `npm run build`, `npm run check` (fails when `dist/` is stale).
-2. Add a CHANGELOG entry and bump `version`; push to `main`. Note the commit
-   in the CHANGELOG (and tag it `vX.Y.Z` where tags can be pushed).
+2. Add a CHANGELOG entry and bump `version`; push to `main`. CI tags the
+   version (`vX.Y.Z`) after a green check; nobody tags by hand.
 3. In each app, point `package.json` at the new commit, `npm install`, `npm run check`.
 
 Breaking changes bump the minor version while below 1.0. Apps move one at a
