@@ -1,6 +1,6 @@
 {
   "name": "bnt-kit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Shared platform for bnt.hm apps on Cloudflare behind Access",
   "type": "module",
   "license": "MIT",
@@ -40,6 +40,10 @@
     "./testing/purity": {
       "types": "./src/testing/purity.ts",
       "default": "./dist/testing/purity.js"
+    },
+    "./testing/mcp": {
+      "types": "./src/testing/mcp.ts",
+      "default": "./dist/testing/mcp.js"
     }
   },
   "bin": {
@@ -81,11 +85,14 @@
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@cloudflare/workers-types": "^5.20261005.1",
+    "@modelcontextprotocol/server": "^2.0.0",
     "@types/node": "^22.20.5",
+    "agents": "^0.26.0",
+    "esbuild": "^0.28.2",
     "preact": "^10.29.8",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3",
     "wrangler": "^4.147.0",
-    "esbuild": "^0.28.2"
+    "zod": "^4.6.7"
   }
 }

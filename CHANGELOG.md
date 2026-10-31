@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+New, no changes for existing apps: `bnt-kit/testing/mcp` (`mcpTestClient`) calls
+an app's MCP tools over JSON-RPC in tests, lifted from Trippie's MCP test. It
+takes the app's fetch handler, so the kit adds no runtime dependency. README:
+setting up an MCP connector behind Access (Managed OAuth).
+
 ## 0.2.0
 
 Breaking: `bnt-kit/client` no longer needs Preact, so apps without it (the
