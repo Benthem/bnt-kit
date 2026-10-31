@@ -17,8 +17,9 @@ jobs:
       - run: npm run check
 
   # Versions are tagged here, not by hand: after a green check on main, the
-  # version in package.json gets its tag on this commit, and every version the
-  # CHANGELOG lists with "— commit <sha>" gets its tag on that commit.
+  # version in package.json gets its tag on this commit (once). GitHub does not
+  # let this token tag older commits whose workflow differs, so tag as you
+  # release, not afterwards.
   tag:
     needs: check
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -29,18 +30,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Tag versions
+      - name: Tag this version
         run: |
           set -euo pipefail
-          tag() {
-            if git rev-parse -q --verify "refs/tags/$1" >/dev/null; then
-              echo "$1 already tagged"
-            else
-              git tag "$1" "$2" && echo "tagged $1 at $2"
-            fi
-          }
-          grep -E '^## [0-9]+\.[0-9]+\.[0-9]+ — commit [0-9a-f]{40}$' CHANGELOG.md | while read -r _ version _ _ sha; do
-            tag "v$version" "$sha"
-          done
-          tag "v$(node -p "require('./package.json').version")" "$GITHUB_SHA"
-          git push origin --tags
+          version="v$(node -p "require('./package.json').version")"
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "$version already tagged"
+          else
+            git tag "$version" "$GITHUB_SHA"
+            git push origin "$version"
+            echo "tagged $version at $GITHUB_SHA"
+          fi
