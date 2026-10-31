@@ -3,9 +3,14 @@
 ## 0.2.1
 
 New, no changes for existing apps: `bnt-kit/testing/mcp` (`mcpTestClient`) calls
-an app's MCP tools over JSON-RPC in tests. It
-takes the app's fetch handler, so the kit adds no runtime dependency. README:
-setting up an MCP connector behind Access (Managed OAuth).
+an app's MCP tools over JSON-RPC in tests. It takes the app's fetch handler, so
+the kit adds no runtime dependency. README: setting up an MCP connector behind
+Access (Managed OAuth).
+
+History was rewritten before this version so the kit names no app that uses it,
+and every earlier commit id changed: v0.2.0 is now 55d7c8a, v0.1.1 069910c. Pin
+apps to the new ids. CI fails when a name from the PRIVATE_NAMES secret appears
+in a file or commit message (`npm run check:names` does the same locally).
 
 ## 0.2.0
 
@@ -22,7 +27,7 @@ No changes for apps. The Access login check has its own tests in the kit
 bypass only on localhost). CI tags each new version after a green check on
 main (from this version on).
 
-## 0.1.0 (untagged: commit e56102ecf03fbd9ce6bd8300c194c0c6c36437c6)
+## 0.1.0 (untagged: commit fb451140ac42b7b8147cae90c1fd7b3e9df8b6b5)
 
 First version, taken from the first apps: Access JWT check, D1 migrations
 (apply, status, apply-on-first-use), board client with "Sign in again",
