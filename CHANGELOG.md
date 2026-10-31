@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.2
+
+New, no changes needed in apps:
+- `identify(request, env)` in `bnt-kit/auth` returns the verified `{ email, issuer, subject }`.
+  `subject` is the provider's stable account id (null when the token has none).
+  Apps that need more than the email use this instead of reading the login token.
+- `authLeaksOf(source)` in `bnt-kit/testing/purity` finds app code that reaches
+  past the kit into the login provider (Access headers, cookies, paths, token
+  libraries). Add it to each app's architecture test.
+- The localhost dev bypass now returns the email lowercased, like real tokens.
+
 ## 0.2.1
 
 New, no changes for existing apps: `bnt-kit/testing/mcp` (`mcpTestClient`) calls

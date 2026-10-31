@@ -53,3 +53,21 @@ export function impuritiesOf(source: string, jsx = false): string[] {
   });
   return found;
 }
+
+const PROVIDER_TEXT = /cf-access-|cf_authorization|cdn-cgi\/access|cloudflareaccess\.com/i;
+const TOKEN_LIBRARIES = ["jose", "jsonwebtoken", "jwt-decode"];
+
+/**
+ * Places where app code reaches past `bnt-kit/auth` into the login provider:
+ * Access headers, cookies and paths in strings, and imports of token libraries
+ * (verifying or decoding login tokens belongs in the kit). Keeps the provider
+ * swappable in the kit alone.
+ */
+export function authLeaksOf(source: string, jsx = false): string[] {
+  const found = importsOf(source, jsx).filter((i) => TOKEN_LIBRARIES.includes(i)).map((i) => `import "${i}"`);
+  walk(parse(source, jsx), (node) => {
+    const text = node.type === "StringLiteral" ? node.value : node.type === "TemplateElement" ? object(node.value)?.cooked : undefined;
+    if (typeof text === "string" && PROVIDER_TEXT.test(text)) found.push(JSON.stringify(text.length > 60 ? `${text.slice(0, 57)}...` : text));
+  });
+  return found;
+}

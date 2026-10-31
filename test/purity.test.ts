@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { importsOf, impuritiesOf } from "../src/testing/purity";
+import { authLeaksOf, importsOf, impuritiesOf } from "../src/testing/purity";
 
 describe("purity scanner", () => {
   it("finds every kind of import", () => {
@@ -12,5 +12,17 @@ describe("purity scanner", () => {
   it("finds reads of the clock and randomness, not dates from values", () => {
     expect(impuritiesOf("Date.now(); new Date(); new Date('2026-01-01'); Math.random(); crypto.randomUUID(); performance.now();"))
       .toEqual(["Date.now()", "new Date()", "Math.random()", "crypto.randomUUID()", "performance.now()"]);
+  });
+});
+
+describe("auth leak scanner", () => {
+  it("finds provider headers, cookies, paths and token libraries", () => {
+    const source = `import { decodeJwt } from "jose"; const t = req.headers.get("Cf-Access-Jwt-Assertion");
+      const c = \`CF_Authorization=\${x}\`; fetch("/cdn-cgi/access/get-identity"); const d = "team.cloudflareaccess.com";`;
+    expect(authLeaksOf(source)).toEqual(['import "jose"', '"Cf-Access-Jwt-Assertion"', '"CF_Authorization="', '"/cdn-cgi/access/get-identity"', '"team.cloudflareaccess.com"']);
+  });
+
+  it("leaves ordinary code alone", () => {
+    expect(authLeaksOf(`import { identify } from "bnt-kit/auth"; const a = "/api/access-log"; // Cf-Access in a comment is fine`)).toEqual([]);
   });
 });

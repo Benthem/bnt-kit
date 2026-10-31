@@ -3,7 +3,7 @@
 // trusting the email header is only safe if nothing can reach the Worker
 // around Access. Fails closed when not configured.
 
-import { createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
+import { createRemoteJWKSet, decodeJwt, jwtVerify, type JWTPayload } from "jose";
 
 export interface AuthEnv {
   ACCESS_TEAM_DOMAIN: string; // e.g. "your-team.cloudflareaccess.com"
@@ -39,11 +39,28 @@ function setupHint(token: string | null): string {
   }
 }
 
-/** Returns the caller's email or throws AuthError. */
-export async function authenticate(request: Request, env: AuthEnv): Promise<string> {
+/** Who is calling, as verified from the login token. */
+export interface Identity {
+  /** Lowercased. */
+  email: string;
+  /** The token's issuer; "local" for the localhost dev bypass. */
+  issuer: string;
+  /**
+   * A stable account id from the issuer, unlike the email, which can change.
+   * Null when the token has none. The dev bypass uses the email.
+   */
+  subject: string | null;
+}
+
+/**
+ * Returns the verified caller or throws AuthError. Apps get identity only from
+ * here, never from the provider's headers or cookies, so the login provider
+ * can change in the kit alone (see `authLeaksOf` in bnt-kit/testing/purity).
+ */
+export async function identify(request: Request, env: AuthEnv): Promise<Identity> {
   const host = new URL(request.url).hostname;
   if (env.DEV_USER_EMAIL && (host === "localhost" || host === "127.0.0.1")) {
-    return env.DEV_USER_EMAIL;
+    return { email: env.DEV_USER_EMAIL.toLowerCase(), issuer: "local", subject: env.DEV_USER_EMAIL.toLowerCase() };
   }
 
   const token = request.headers.get("Cf-Access-Jwt-Assertion");
@@ -52,17 +69,25 @@ export async function authenticate(request: Request, env: AuthEnv): Promise<stri
   }
   if (!token) throw new AuthError("Missing Cf-Access-Jwt-Assertion; request did not come through Access");
 
-  let email: unknown;
+  let payload: JWTPayload;
   try {
-    const { payload } = await jwtVerify(token, jwks(env.ACCESS_TEAM_DOMAIN), {
+    ({ payload } = await jwtVerify(token, jwks(env.ACCESS_TEAM_DOMAIN), {
       issuer: `https://${env.ACCESS_TEAM_DOMAIN}`,
       audience: env.ACCESS_AUD,
-    });
-    email = payload.email;
+    }));
   } catch (e) {
     throw new AuthError(`Invalid Access token: ${(e as Error).message}`);
   }
 
-  if (typeof email !== "string") throw new AuthError("Access token has no email");
-  return email.toLowerCase();
+  if (typeof payload.email !== "string") throw new AuthError("Access token has no email");
+  return {
+    email: payload.email.toLowerCase(),
+    issuer: String(payload.iss),
+    subject: typeof payload.sub === "string" && payload.sub ? payload.sub : null,
+  };
+}
+
+/** Returns the caller's email or throws AuthError. */
+export async function authenticate(request: Request, env: AuthEnv): Promise<string> {
+  return (await identify(request, env)).email;
 }

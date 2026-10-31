@@ -20,30 +20,37 @@ function setupHint(token) {
     return "";
   }
 }
-async function authenticate(request, env) {
+async function identify(request, env) {
   const host = new URL(request.url).hostname;
   if (env.DEV_USER_EMAIL && (host === "localhost" || host === "127.0.0.1")) {
-    return env.DEV_USER_EMAIL;
+    return { email: env.DEV_USER_EMAIL.toLowerCase(), issuer: "local", subject: env.DEV_USER_EMAIL.toLowerCase() };
   }
   const token = request.headers.get("Cf-Access-Jwt-Assertion");
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) {
     throw new AuthError(`Access is not configured (ACCESS_TEAM_DOMAIN / ACCESS_AUD)${setupHint(token)}`);
   }
   if (!token) throw new AuthError("Missing Cf-Access-Jwt-Assertion; request did not come through Access");
-  let email;
+  let payload;
   try {
-    const { payload } = await jwtVerify(token, jwks(env.ACCESS_TEAM_DOMAIN), {
+    ({ payload } = await jwtVerify(token, jwks(env.ACCESS_TEAM_DOMAIN), {
       issuer: `https://${env.ACCESS_TEAM_DOMAIN}`,
       audience: env.ACCESS_AUD
-    });
-    email = payload.email;
+    }));
   } catch (e) {
     throw new AuthError(`Invalid Access token: ${e.message}`);
   }
-  if (typeof email !== "string") throw new AuthError("Access token has no email");
-  return email.toLowerCase();
+  if (typeof payload.email !== "string") throw new AuthError("Access token has no email");
+  return {
+    email: payload.email.toLowerCase(),
+    issuer: String(payload.iss),
+    subject: typeof payload.sub === "string" && payload.sub ? payload.sub : null
+  };
+}
+async function authenticate(request, env) {
+  return (await identify(request, env)).email;
 }
 export {
   AuthError,
-  authenticate
+  authenticate,
+  identify
 };

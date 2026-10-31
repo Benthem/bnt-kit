@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { exportJWK, generateKeyPair, SignJWT, UnsecuredJWT } from "jose";
-import { AuthError, authenticate } from "../src/auth";
+import { AuthError, authenticate, identify } from "../src/auth";
 
 const env = { ACCESS_TEAM_DOMAIN: "team.cloudflareaccess.com", ACCESS_AUD: "aud" };
 
@@ -18,6 +18,10 @@ describe("auth fails closed", () => {
   });
   it("uses DEV_USER_EMAIL on localhost only", async () => {
     expect(await authenticate(new Request("http://localhost:8787/api/data"), { ...env, DEV_USER_EMAIL: "dev@example.com" })).toBe("dev@example.com");
+  });
+  it("identify on localhost: issuer local, the dev email as subject", async () => {
+    expect(await identify(new Request("http://localhost:8787/"), { ...env, DEV_USER_EMAIL: "Dev@Example.com" }))
+      .toEqual({ email: "dev@example.com", issuer: "local", subject: "dev@example.com" });
   });
   it("uses DEV_USER_EMAIL on 127.0.0.1 too, but not on hosts that only look local", async () => {
     const dev = { ...env, DEV_USER_EMAIL: "dev@example.com" };
@@ -79,6 +83,19 @@ describe("Access tokens", () => {
     const t = await team();
     const { privateKey: forged } = await generateKeyPair("RS256");
     await expect(t.call(await t.sign(undefined, { key: forged }))).rejects.toThrow(/Invalid Access token/);
+  });
+
+  it("identify returns the verified email, issuer and subject", async () => {
+    const t = await team();
+    const token = await t.sign({ email: "Person@Example.com", sub: "user-123" });
+    const who = await identify(new Request("https://app.bnt.hm/api/data", { headers: { "Cf-Access-Jwt-Assertion": token } }), { ACCESS_TEAM_DOMAIN: t.domain, ACCESS_AUD: "aud" });
+    expect(who).toEqual({ email: "person@example.com", issuer: `https://${t.domain}`, subject: "user-123" });
+  });
+
+  it("identify gives a null subject when the token has none", async () => {
+    const t = await team();
+    const who = await identify(new Request("https://app.bnt.hm/", { headers: { "Cf-Access-Jwt-Assertion": await t.sign() } }), { ACCESS_TEAM_DOMAIN: t.domain, ACCESS_AUD: "aud" });
+    expect(who.subject).toBeNull();
   });
 
   it("rejects a verified token without an email", async () => {

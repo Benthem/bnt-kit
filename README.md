@@ -21,14 +21,14 @@ their Vite config so the kit's hooks use the app's Preact.
 
 | Import | What |
 |---|---|
-| `bnt-kit/auth` | `authenticate(request, env)`: verifies the Access JWT (issuer + AUD) on every request; local dev bypass via `DEV_USER_EMAIL` on localhost only; shows the AUD Access sent while setting up. |
+| `bnt-kit/auth` | `identify(request, env)` → `{ email, issuer, subject }` and `authenticate(request, env)` → email: verifies the Access JWT (issuer + AUD) on every request; local dev bypass via `DEV_USER_EMAIL` on localhost only; shows the AUD Access sent while setting up. Apps get identity only from here. |
 | `bnt-kit/d1-migrations` | `statements`, `migrationStatus`, `applyMigrations`, `ensureSchema`: apply bundled `migrations/*.sql` from the Worker, logged in Wrangler's `d1_migrations` table, one atomic batch per file. |
 | `bnt-kit/client` | No framework. `accessFetch`, `readJson`: turn Access's expired-login answers into `SignInNeeded`, Cloudflare error pages into `ServerError` and a dead network into `Offline`; `onSignInNeeded(listener)` + `signIn()` for a "Sign in again" button. |
 | `bnt-kit/preact` | `useSignInNeeded()`: the same as a Preact hook. |
 | `bnt-kit/pwa` (Preact) | `useUpdateAvailable()`: registers `/sw.js`; a new build waits for a tap; optional release notes from the waiting worker. `requestPersistence()`. |
 | `bnt-kit/sw` | Service worker building blocks: precached shell per build, network-first page loads, never caching `/api/` and `/cdn-cgi/`, leaving "Sign in again" page loads alone. |
 | `bnt-kit/testing/d1` | `openD1({ configPath, migrationsDir })`: a fresh local D1 with migrations applied. |
-| `bnt-kit/testing/purity` | `importsOf`, `impuritiesOf`: for architecture tests that keep pure code pure. |
+| `bnt-kit/testing/purity` | `importsOf`, `impuritiesOf`: for architecture tests that keep pure code pure. `authLeaksOf`: login-provider headers, cookies, paths or token libraries in app code, so the provider can change in the kit alone. |
 | `bnt-kit/testing/mcp` | `mcpTestClient(handler)`: `call`, `listTools`, `tool(name, args)` against the app's MCP fetch handler over JSON-RPC, as Claude calls it. No MCP dependency in the kit. |
 | `bnt-bundle-migrations <dir> <out.ts> [--check]` | Bundles migrations for the Worker; `--check` fails when stale. |
 | `bnt-worker-build` | Wrangler `build.command`: runs `npm run check` before deploys and version uploads, `npm run build` for types/dev. |

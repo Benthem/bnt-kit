@@ -42,7 +42,18 @@ function impuritiesOf(source, jsx = false) {
   });
   return found;
 }
+const PROVIDER_TEXT = /cf-access-|cf_authorization|cdn-cgi\/access|cloudflareaccess\.com/i;
+const TOKEN_LIBRARIES = ["jose", "jsonwebtoken", "jwt-decode"];
+function authLeaksOf(source, jsx = false) {
+  const found = importsOf(source, jsx).filter((i) => TOKEN_LIBRARIES.includes(i)).map((i) => `import "${i}"`);
+  walk(parse(source, jsx), (node) => {
+    const text = node.type === "StringLiteral" ? node.value : node.type === "TemplateElement" ? object(node.value)?.cooked : void 0;
+    if (typeof text === "string" && PROVIDER_TEXT.test(text)) found.push(JSON.stringify(text.length > 60 ? `${text.slice(0, 57)}...` : text));
+  });
+  return found;
+}
 export {
+  authLeaksOf,
   importsOf,
   impuritiesOf
 };
