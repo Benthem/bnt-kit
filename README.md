@@ -29,8 +29,25 @@ their Vite config so the kit's hooks use the app's Preact.
 | `bnt-kit/sw` | Service worker building blocks: precached shell per build, network-first page loads, never caching `/api/` and `/cdn-cgi/`, leaving "Sign in again" page loads alone. |
 | `bnt-kit/testing/d1` | `openD1({ configPath, migrationsDir })`: a fresh local D1 with migrations applied. |
 | `bnt-kit/testing/purity` | `importsOf`, `impuritiesOf`: for architecture tests that keep pure code pure. |
+| `bnt-kit/testing/mcp` | `mcpTestClient(handler)`: `call`, `listTools`, `tool(name, args)` against the app's MCP fetch handler over JSON-RPC, as Claude calls it. No MCP dependency in the kit. |
 | `bnt-bundle-migrations <dir> <out.ts> [--check]` | Bundles migrations for the Worker; `--check` fails when stale. |
 | `bnt-worker-build` | Wrangler `build.command`: runs `npm run check` before deploys and version uploads, `npm run build` for types/dev. |
+
+## An MCP connector
+
+An app's MCP endpoint sits behind the same Access app as its board; no extra
+auth code.
+
+1. Access app for the hostname: turn on **Managed OAuth** and allow the
+   redirect URIs `https://claude.ai/api/mcp/auth_callback` and
+   `https://claude.com/api/mcp/auth_callback` (ChatGPT needs its own).
+2. In the Worker, `authenticate(request, env)` first, then
+   `createMcpHandler(() => createServer(deps), { route: "/mcp" })` from
+   `agents/mcp/server`, with the caller's email in `deps` for attribution.
+3. Each person adds `https://<host>/mcp` as a custom connector in their own
+   Claude account (Settings → Connectors).
+4. Test the tools with `mcpTestClient` from `bnt-kit/testing/mcp`. Tool
+   descriptions are prompts for Claude: test what they promise.
 
 ## Changing the kit
 
