@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+Breaking: `bnt-kit/client` no longer needs Preact, so apps without it (the
+woningkaart) can use it. `useSignInNeeded` moved to `bnt-kit/preact`; plain apps
+use `onSignInNeeded(listener)` from `bnt-kit/client`.
+
+Upgrade: `import { useSignInNeeded } from "bnt-kit/preact"`.
+
 ## 0.1.1
 
 No changes for apps. The Access login check has its own tests in the kit

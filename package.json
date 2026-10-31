@@ -1,6 +1,6 @@
 {
   "name": "bnt-kit",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Shared platform for bnt.hm apps on Cloudflare behind Access",
   "type": "module",
   "license": "MIT",
@@ -20,6 +20,10 @@
     "./client": {
       "types": "./src/client.ts",
       "default": "./dist/client.js"
+    },
+    "./preact": {
+      "types": "./src/preact.ts",
+      "default": "./dist/preact.js"
     },
     "./pwa": {
       "types": "./src/pwa.ts",

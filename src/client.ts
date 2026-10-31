@@ -2,9 +2,8 @@
 // Access session has expired, Access answers every request with a redirect to
 // its login page on another domain: fetch either fails outright (the browser
 // will not hand a cross-origin page to the app) or comes back as HTML. Both
-// mean "sign in again", not "no connection" or "bad answer".
-
-import { useEffect, useState } from "preact/hooks";
+// mean "sign in again", not "no connection" or "bad answer". No framework:
+// Preact apps get a hook from bnt-kit/preact.
 
 /** Thrown when Access wants a new login. */
 export class SignInNeeded extends Error {
@@ -86,13 +85,8 @@ export function forgetSignInMarker(): void {
   if (new URLSearchParams(location.search).has(SIGN_IN_PARAM)) history.replaceState(null, "", `/${location.hash}`);
 }
 
-/** True once any request found the login expired; show a "Sign in again" button. */
-export function useSignInNeeded(): boolean {
-  const [needed, setNeeded] = useState(false);
-  useEffect(() => {
-    const on = () => setNeeded(true);
-    addEventListener(SIGN_IN_EVENT, on);
-    return () => removeEventListener(SIGN_IN_EVENT, on);
-  }, []);
-  return needed;
+/** Calls `listener` whenever a request finds the login expired; returns the unsubscribe. */
+export function onSignInNeeded(listener: () => void): () => void {
+  addEventListener(SIGN_IN_EVENT, listener);
+  return () => removeEventListener(SIGN_IN_EVENT, listener);
 }

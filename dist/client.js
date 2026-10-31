@@ -1,5 +1,4 @@
 // Compiled from src/client.ts by scripts/build.mjs. Do not edit.
-import { useEffect, useState } from "preact/hooks";
 class SignInNeeded extends Error {
   constructor() {
     super("Your login has expired.");
@@ -56,14 +55,9 @@ function signIn() {
 function forgetSignInMarker() {
   if (new URLSearchParams(location.search).has(SIGN_IN_PARAM)) history.replaceState(null, "", `/${location.hash}`);
 }
-function useSignInNeeded() {
-  const [needed, setNeeded] = useState(false);
-  useEffect(() => {
-    const on = () => setNeeded(true);
-    addEventListener(SIGN_IN_EVENT, on);
-    return () => removeEventListener(SIGN_IN_EVENT, on);
-  }, []);
-  return needed;
+function onSignInNeeded(listener) {
+  addEventListener(SIGN_IN_EVENT, listener);
+  return () => removeEventListener(SIGN_IN_EVENT, listener);
 }
 export {
   Offline,
@@ -73,8 +67,8 @@ export {
   SignInNeeded,
   accessFetch,
   forgetSignInMarker,
+  onSignInNeeded,
   readJson,
   signIn,
-  signInNeeded,
-  useSignInNeeded
+  signInNeeded
 };

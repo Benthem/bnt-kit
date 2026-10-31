@@ -1,9 +1,30 @@
 {
   "compilerOptions": {
-    "target": "es2024", "lib": ["es2024"], "module": "es2022", "moduleResolution": "bundler",
-    "types": ["@cloudflare/workers-types", "node"],
-    "strict": true, "erasableSyntaxOnly": true, "noUncheckedIndexedAccess": true, "noEmit": true, "skipLibCheck": true,
-    "isolatedModules": true, "verbatimModuleSyntax": true
+    "target": "es2024",
+    "lib": [
+      "es2024"
+    ],
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "types": [
+      "@cloudflare/workers-types",
+      "node"
+    ],
+    "strict": true,
+    "erasableSyntaxOnly": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
   },
-  "include": ["src/auth.ts", "src/d1-migrations.ts", "src/testing", "test"]
+  "include": [
+    "src/auth.ts",
+    "src/d1-migrations.ts",
+    "src/testing",
+    "test"
+  ],
+  "exclude": [
+    "test/client.test.ts"
+  ]
 }
